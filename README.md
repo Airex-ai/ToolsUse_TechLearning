@@ -436,3 +436,17 @@ launch.json:   对应的原始命令为“CUDA_VISIBLE_DEVICES=2,3,4,5  XLA_PYTH
 1. 在main函数顶端插入“    jax.config.update("jax_disable_jit", True)  # DEBUG: 关闭JIT”
 2. 调试中直接悬浮鼠标查看即可
 
+
+
+### Codegraph的使用
+
+在让大模型阅读整个项目时，在本地预先为代码库建立精确的符号关联和调用图，节约高达 90% 的探索时间。
+
+```bash
+1. npx @colbymchenry/codegraph
+2. 重启客户端
+3.  cd your-project
+	codegraph init -i
+```
+
+可以通过项目文件夹下的`.codegraph`查看是否成功初始化，并检查IDE的MCP列表是否存在codegraph
