@@ -433,7 +433,7 @@ launch.json:   对应的原始命令为“CUDA_VISIBLE_DEVICES=2,3,4,5  XLA_PYTH
 
 
 ### 调试jax框架时查看变量实际值
-1. 在main函数顶端插入“    jax.config.update("jax_disable_jit", True)  # DEBUG: 关闭JIT”
+1. 在main函数顶端（第一行）插入jax.config.update("jax_disable_jit", True)  # DEBUG: 关闭JIT”
 2. 调试中直接悬浮鼠标查看即可
 
 
