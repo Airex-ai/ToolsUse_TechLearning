@@ -397,6 +397,7 @@ launch.json:   对应的原始命令为“CUDA_VISIBLE_DEVICES=2,3,4,5  XLA_PYTH
             "request": "launch",
             "program": "${workspaceFolder}/scripts/serve_policy.py",
             "python": "${workspaceFolder}/.venv/bin/python",
+            "justMyCode": false,      //加上可以跳到虚拟环境安装路径调试
             "args": [
                 "--env", "PICK_CUBE",
                 "--default_prompt", "Stack red cube on green cube, then stack yellow cube on blue cube | A robot is on a flat tabletop with four colored cubes: red, green, yellow, blue placed on the table."
