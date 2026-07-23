@@ -406,7 +406,6 @@ launch.json:   对应的原始命令为“CUDA_VISIBLE_DEVICES=2,3,4,5  XLA_PYTH
                 "CUDA_VISIBLE_DEVICES": "0,1,2,3"
             },
             "console": "integratedTerminal",
-            "justMyCode": false,
             "cwd": "${workspaceFolder}"
         },
         {
