@@ -450,3 +450,136 @@ launch.json:   对应的原始命令为“CUDA_VISIBLE_DEVICES=2,3,4,5  XLA_PYTH
 ```
 
 可以通过项目文件夹下的`.codegraph`查看是否成功初始化，并检查IDE的MCP列表是否存在codegraph
+
+
+
+## github提交远程仓库
+
+------
+
+#### 一、GitHub 网页建私有仓库
+
+1. 登录 Airex-ai
+2. 打开 https://github.com/new
+3. Repository name：`lerobot_vla`
+4. Visibility：Private
+5. 不要勾选 README / .gitignore / License
+6. Create repository
+   地址：`https://github.com/Airex-ai/lerobot_vla.git`
+
+------
+
+#### 二、本机配置提交身份（本仓库即可）
+
+```sh
+cd /data/ycb_project/lerobot
+
+git config user.name "Airex-ai"
+
+git config user.email "2722683946@.com"
+```
+
+------
+
+#### 三、从零初始化（适配旧版 Git）
+
+```sh
+git init
+
+git checkout -b main
+
+注意： 不要执行 `git init main`（会多出误建的 `main/` 空仓库）。若已存在：
+
+rm -rf main
+```
+
+------
+
+#### 四、忽略 data / outputs，再暂存
+
+`.gitignore` 里已有 `outputs/`；对符号链接 `data`，需同时忽略 `data` 和 `data/`：*
+
+```sh
+grep -nE '^(data|outputs)' .gitignore
+```
+
+若已把 `data` 加进暂存区：
+
+```sh
+git rm --cached data
+```
+
+然后：
+
+```sh
+git add .
+
+git status
+```
+
+核对：
+
+- 有代码、文档、`src/` 等
+- 没有 `data`、`outputs`、`.venv`、`.cache`、`main/`
+- `.vscode/` 默认被忽略（`launch.json` 不会上传）
+
+------
+
+#### 五、首次提交
+
+```sh
+git commit -m "$(cat <<'EOF'
+
+Initial snapshot: lerobot_vla v1.0.0
+
+Archive current working tree as the first retained version.
+
+EOF
+
+)"
+```
+
+------
+
+#### 六、关联远程并推送
+
+```sh
+git remote add origin https://github.com/Airex-ai/lerobot_vla.git
+
+*# 或：git remote set-url origin https://github.com/Airex-ai/lerobot_vla.git*
+
+git config http.postBuffer 524288000
+
+git config http.version HTTP/1.1
+
+git push -u origin main
+```
+
+密码处填 Personal Access Token，不是登录密码。
+若再出现 `GnuTLS recv error (-110)`：换网络/代理。
+
+------
+
+#### 七、打 tag 并做 Release
+
+```sh
+git tag -a v1.0.0 -m "v1.0.0: first archived snapshot"
+
+git push origin v1.0.0
+```
+
+网页：https://github.com/Airex-ai/lerobot_vla/releases/new
+
+- Choose tag：`v1.0.0`
+- Title：`v1.0.0`
+- 写一句归档说明 → Publish release
+
+------
+
+#### 八、完成后核对
+
+- 仓库为 Private
+- `main` 上有首次提交
+- 无 `data/`、`outputs/`
+- 有 tag `v1.0.0` 与对应 Release
+- 确认无误后，可删本地备份：`rm -rf .git.bak.hf`（可选）
