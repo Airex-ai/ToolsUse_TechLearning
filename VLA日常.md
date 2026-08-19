@@ -104,16 +104,47 @@ index_key='index',
 - FluxDAgger（独立仓库）：用 π0.5 在真机/仿真 rollout，人在失败时接管，把新数据并回 BC。这是交互式模仿，不是 RL。
 - RTC：推理时用已执行动作当 prefix，保证 chunk 之间连续，和训练算法无关。
 
-```
-pick stamp
-move to paper
-press stamp
 
 
-reach stamp
-grasp stamp
-lift stamp
-align to paper
-press down
-lift off
+### Conrft`https://github.com/cccedric/conrft`记录
+
+RL混合范式：离线预训练 + 在线强化学习（带人类介入）
+
+| 阶段       | 名称         | 数据                              | 算法                                         | 是否真机交互        |
+| -------- | ---------- | ------------------------------- | ------------------------------------------ | ------------- |
+| Stage I  | Cal-ConRFT | 人工示教 demo                       | `update_calql`（CalQL + Consistency Policy） | 否（只训模型）       |
+| Stage II | HIL-ConRFT | 真机 online 轨迹 + demo 各 50%（RLPD） | `update_ql`                                | 是（actor 边采边训） |
+
+在线阶段还有 Human-in-the-Loop可随时覆盖策略动作；介入轨迹会额外写入 `demo_buffer`，当作高质量数据继续用。
+
+#### 参考步骤：
+
+1. 采集成功与失败的图像（失败大概是成功2——3倍），训练二分类器
+
+2. 人类在线操作机器人，二分类器判断是否成功，成功的episode入库。保存的embedding 是冻结的 Octo 视觉-语言表征
+
+3. 使用录制成功的episode离线强化学习，只需要Learner，不需要Actor。用示教embedding离线学“动作生成器 + Q”。真机上不能从随机策略开训。阶段3把 Octo 表征接到一个已经会“跟着示教走”的 consistency 策略，并给 Q 一个 Cal-QL 初值。
+
+4. 在线强化学习，可人工干预。把 Actor 采数和 Learner 更新拆成两个进程，用 replay 解耦，边采边训。训的是 会动手的策略 + 会打分的 Q；随机抽步是因为损失只看单步 (s,a,r,s′)，乱序混合 demo/online 才能稳定、高效地做离策略更新。
+
+
+
+#### Nora1.5`https://github.com/declare-lab/nora-1.5/tree/main`记录
+
+
+
+#### 参考步骤：
+
 ```
+generate_data.py  →  label_generated_data.py  →  train_dpo_nora.py
+      ↑                        ↑
+   只需 VLA              需要已训好的 VJEPA2-AC
+```
+
+1. 微调基本VLA
+
+2. 使用基本VLA生成同一场景的多条轨迹，并记录起始帧与结束帧（generate_data.py）
+
+3. 使用自定义数据训练VJEPA2-AC：在 label 阶段：给定当前帧 + 某条动作序列，预测未来表征，再与 `goal_frame` 算 L1（`goal_energy`）。能量越低，认为越接近目标 → 用来挑 chosen / rejected，供 DPO 用。**chosen轨迹与rejected轨迹的goal_energy很相近，偏好间隔很弱，DPO很难学到方向**
+
+4. DPO训练：通过训练鼓励VLA预测的动作靠近chosen，远离rejected
