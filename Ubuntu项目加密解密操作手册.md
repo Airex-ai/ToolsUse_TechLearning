@@ -184,7 +184,7 @@ mv "$ROOT/$P" "$ROOT/.$P.bak"
 ```bash
 mkdir "$ROOT/$P"
 
-~/bin/gocryptfs "$CIPHER" "$ROOT/$P"
+~/bin/gocryptfs "$CIPHER" "$ROOT/$P"        #加密项目挂载操作
 ```
 
 | 作用                                              |
