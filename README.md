@@ -747,3 +747,61 @@ git push origin v1.0.0
 - 无 `data/`、`outputs/`
 - 有 tag `v1.0.0` 与对应 Release
 - 确认无误后，可删本地备份：`rm -rf .git.bak.hf`（可选）
+
+
+
+
+
+====================================================================================================
+### cusor通过ssh连接服务器
+## 1. SSH 配置
+
+文件：`C:\Users\R26459\.ssh\config`
+
+```
+Host server123
+    HostName 10.132.16.123
+    User 6aa8f69327e5edf864960bf0-1789458067
+    Port 2222
+    ExitOnForwardFailure no
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    ConnectTimeout 30
+    Compression yes
+```
+
+这个用户名是 Autel 的登录账号，不是进去之后 shell 里显示的 `R26459`。公钥写进远端 `~/.ssh/authorized_keys` 不会生效，每次都要输入密码。
+
+## 2. Cursor 设置
+
+文件：`C:\Users\R26459\AppData\Roaming\Cursor\User\settings.json`
+
+这三项保持打开：
+
+```
+"remote.SSH.showLoginTerminal": true,
+"remote.SSH.connectTimeout": 180,
+"remote.SSH.localServerDownload": "always",
+"remote.SSH.remotePlatform": {
+    "server123": "linux"
+}
+```
+
+- `showLoginTerminal`：密码改在终端里输入，不用弹窗。
+- `connectTimeout`：安装静默等待 180 秒。默认大约 60 秒，脚本还没输出就被掐断。
+- `localServerDownload`：Cursor 服务端在你这台 Windows 上下载，再经 SSH 拷到远端。不要让远端自己去下载。
+
+## 3. 连接
+
+1. `Ctrl+Shift+P`，选 Remote-SSH: Connect to Host…，选 `server123`。
+2. 在弹出的终端里输入密码。输入时不会显示字符，输完按回车。
+3. 看到 `Configuring Cursor Server on Remote` 后继续等，不要马上关掉。第一次安装可能要一两分钟。
+4. 左下角出现 `SSH: server123` 后，用 File → Open Folder 打开远端目录。
+
+先在本机 PowerShell 确认密码可用：
+
+```
+ssh server123 echo ok
+```
+
+出现 `ok` 再回 Cursor 连接。这条命令要在 `PS C:\Users\R26459>` 下执行，不要在已经登录的 `R26459@DEV-960bf0:~$` 里执行。
